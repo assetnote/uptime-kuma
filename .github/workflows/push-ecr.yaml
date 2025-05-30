@@ -14,8 +14,6 @@ jobs:
     permissions:
       id-token: write
       contents: write
-    outputs:
-      tag: ${{ steps.version.outputs.next}}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,34 +38,13 @@ jobs:
           registries: ${{ secrets.aws_account_id }}
           mask-password: "true"
 
-      - name: Set next version
-        id: version
-        run: |
-
-          VERSION=$(git describe --tags --abbrev=0)
-          echo "Current version: $VERSION"
-
-          BRANCH_NAME=${GITHUB_REF#refs/heads/}
-          if [[ "$BRANCH_NAME" == "main" ]]; then
-            svu_url="https://github.com/caarlos0/svu/releases/download/v3.0.0/svu_3.0.0_linux_amd64.tar.gz"
-            wget -qO- "$svu_url" | tar xvz >/dev/null 2>&1
-            next="$(./svu n --always)"
-          elif [[ "$BRANCH_NAME" == "staging" ]]; then
-            latest_bare_tag="$(echo "$VERSION" | sed 's/-.*//g')"
-            build_num="${GITHUB_RUN_NUMBER:-0}"
-            next="${latest_bare_tag}-${BRANCH_NAME}.${build_num}"
-          fi
-
-          echo "Next version: $next"
-          echo "next=$next" >> "$GITHUB_OUTPUT"
-
       - name: Build, tag, and push image to Amazon ECR
         id: build-push
         uses: docker/build-push-action@v6
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: uptime-kuma
-          IMAGE_TAG: ${{ steps.version.outputs.next}}
+          IMAGE_TAG: ${{ github.ref_name }}
         with:
           context: .
           file: ./docker/dockerfile
@@ -77,14 +54,3 @@ jobs:
             ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
             ${{ github.ref_name == 'main' && format('{0}/{1}:latest', env.ECR_REGISTRY, env.ECR_REPOSITORY) || '' }}
           provenance: false
-
-      - name: Create tag
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.git.createRef({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: 'refs/tags/${{ steps.version.outputs.next}}',
-              sha: context.sha
-            })

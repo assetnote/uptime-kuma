@@ -44,37 +44,42 @@ class Slack extends NotificationProvider {
                 return okMsg;
             }
 
-            const textMsg = "Uptime Kuma Alert";
+            const title = monitorJSON["name"] + " - " + (heartbeatJSON["status"] === UP) ? "UP" : "DOWN";
             let data = {
                 // "text": `${textMsg}\n${msg}`,
-                "channel": notification.slackchannel,
-                "username": notification.slackusername,
-                "icon_emoji": notification.slackiconemo,
-                "attachments": [
+                channel: notification.slackchannel,
+                username: notification.slackusername,
+                icon_emoji: notification.slackiconemo,
+                attachments: [
                     {
-                        "color": (heartbeatJSON["status"] === UP) ? "#2eb886" : "#e01e5a",
-                        "blocks": [
+                        color:
+                            heartbeatJSON["status"] === UP
+                                ? "#2eb886"
+                                : "#e01e5a",
+                        blocks: [
                             {
-                                "type": "header",
-                                "text": {
-                                    "type": "plain_text",
-                                    "text": textMsg,
+                                type: "header",
+                                text: {
+                                    type: "plain_text",
+                                    text: title,
                                 },
                             },
                             {
-                                "type": "section",
-                                "fields": [{
-                                    "type": "mrkdwn",
-                                    "text": "*Message*\n" + msg,
-                                },
-                                {
-                                    "type": "mrkdwn",
-                                    "text": `*Time (${heartbeatJSON["timezone"]})*\n${heartbeatJSON["localDateTime"]}`,
-                                }],
-                            }
+                                type: "section",
+                                fields: [
+                                    {
+                                        type: "mrkdwn",
+                                        text: "*Message*\n" + msg,
+                                    },
+                                    {
+                                        type: "mrkdwn",
+                                        text: `*Time (${heartbeatJSON["timezone"]})*\n${heartbeatJSON["localDateTime"]}`,
+                                    },
+                                ],
+                            },
                         ],
-                    }
-                ]
+                    },
+                ],
             };
 
             if (notification.slackbutton) {
