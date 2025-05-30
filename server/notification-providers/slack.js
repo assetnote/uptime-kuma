@@ -46,7 +46,7 @@ class Slack extends NotificationProvider {
 
             const textMsg = "Uptime Kuma Alert";
             let data = {
-                "text": `${textMsg}\n${msg}`,
+                // "text": `${textMsg}\n${msg}`,
                 "channel": notification.slackchannel,
                 "username": notification.slackusername,
                 "icon_emoji": notification.slackiconemo,
