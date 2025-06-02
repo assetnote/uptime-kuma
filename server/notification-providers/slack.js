@@ -44,7 +44,10 @@ class Slack extends NotificationProvider {
                 return okMsg;
             }
 
-            const title = monitorJSON["name"] + " - " + (heartbeatJSON["status"] === UP) ? "UP" : "DOWN";
+            const title =
+                monitorJSON["name"] +
+                " - " +
+                (heartbeatJSON["status"] === UP ? "UP" : "DOWN");
             let data = {
                 // "text": `${textMsg}\n${msg}`,
                 channel: notification.slackchannel,
