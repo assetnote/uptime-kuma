@@ -184,9 +184,10 @@ class Slack extends NotificationProvider {
             const groupPath =
                 includeGroupName && monitorJSON?.path?.length > 1 ? monitorJSON.path.slice(0, -1).join(" / ") : "";
 
-            const title = monitorJSON?.name || "Uptime Kuma Alert";
+            const title = (monitorJSON?.name || "Uptime Kuma") +
+                " - " +
+                (heartbeatJSON["status"] === UP ? "UP" : "DOWN");
             let data = {
-                text: msg,
                 channel: notification.slackchannel,
                 username: notification.slackusername,
                 icon_emoji: notification.slackiconemo,
